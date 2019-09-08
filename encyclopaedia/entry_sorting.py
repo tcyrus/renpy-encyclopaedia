@@ -6,16 +6,11 @@ def push_locked_to_bottom(seq):
     the bottom of the list.
 
     Args:
-        seq: The sequence of EncEntry to sort.
+        seq: The EncEntry list to sort.
 
     Returns:
         list: Sorted version of the given sequence
     """
-    new_list = sorted(seq, reverse=True, key=attrgetter('locked'))
-
-    del seq[:]
-
-    for item in new_list:
-        seq.append(item)
+    seq.sort(reverse=True, key=attrgetter('locked'))
 
     return seq
