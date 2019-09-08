@@ -31,10 +31,10 @@ class SetEntryAction(EncyclopaediaAction):
 
     def set_entry(self):
         # Find the position of the entry
-        if self.enc.show_locked_entry is False:
-            target_position = self.enc.unlocked_entries.index(self.entry)
-        else:
+        if self.enc.show_locked_entry:
             target_position = self.enc.all_entries.index(self.entry)
+        else:
+            target_position = self.enc.unlocked_entries.index(self.entry)
 
         # The active entry is set to whichever list position was found.
         self.enc.active = self.entry
@@ -82,9 +82,7 @@ class ChangeAction(EncyclopaediaAction):
         Returns:
             bool: True if the button should be alive, else False.
         """
-        if self.block:
-            return False
-        return True
+        return (not self.block)
 
 
 class ChangeEntryAction(ChangeAction):
@@ -105,10 +103,10 @@ class ChangeEntryAction(ChangeAction):
         Returns:
             EncEntry
         """
-        if self.enc.show_locked_entry is False:
-            entry = self.enc.unlocked_entries[self.enc.current_position]
-        else:
+        if self.enc.show_locked_entry:
             entry = self.enc.all_entries[self.enc.current_position]
+        else:
+            entry = self.enc.unlocked_entries[self.enc.current_position]
 
         return entry
 
@@ -170,9 +168,7 @@ class SortEncyclopaedia(EncyclopaediaAction):
 
         self.sorting_mode = sorting_mode
 
-        self.reverse = False
-        if sorting_mode == self.enc.SORT_REVERSE_ALPHABETICAL:
-            self.reverse = True
+        self.reverse = (sorting_mode == self.enc.SORT_REVERSE_ALPHABETICAL)
 
     def __call__(self):
         self.enc.sort_entries(
@@ -195,12 +191,12 @@ def _build_subject_filter(enc, subject):
         enc (Encyclopaedia): The encyclopaedia to filter.
         subject (str): The subject for the filter.
     """
-    if enc.show_locked_buttons is False:
-        entries = enc.unlocked_entries
-    else:
+    if enc.show_locked_buttons:
         entries = enc.all_entries
+    else:
+        entries = enc.unlocked_entries
 
-    enc.filtered_entries = [i for i in entries if i.subject == subject]
+    enc.filtered_entries = list(filter(lambda i: i.subject == subject, entries))
 
 
 class FilterBySubject(EncyclopaediaAction):
@@ -252,9 +248,7 @@ class ToggleShowLockedButtonsAction(EncyclopaediaAction):
             _build_subject_filter(self.enc, self.enc.filtering)
 
         # Ensure the sorting isn't broken by hiding buttons.
-        reverse = False
-        if self.enc.sorting_mode == self.enc.SORT_REVERSE_ALPHABETICAL:
-            reverse = True
+        reverse = (self.enc.sorting_mode == self.enc.SORT_REVERSE_ALPHABETICAL)
 
         self.enc.sort_entries(
             entries=self.enc.current_entries,
